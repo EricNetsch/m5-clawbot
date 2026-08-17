@@ -1,0 +1,49 @@
+idf_component_register(
+    SRCS
+        "app_main.c"
+        "esp_openclaw_node_example_adc_node_cmd.c"
+        "esp_openclaw_node_example_cmd.c"
+        "esp_openclaw_node_example_gpio_node_cmd.c"
+        "esp_openclaw_node_stackchan_rgb_cmd.c"
+        "stackchan_m5_i2c.cpp"
+        "stackchan_boot.cpp"
+        "esp_openclaw_node_stackchan_body_cmd.cpp"
+        "stackchan_servo.c"
+        "stackchan_joyc.cpp"
+        "stackchan_voice.cpp"
+        "stackchan_voice_net.c"
+        "stackchan_camera.cpp"
+        "stackchan_espnow_remote.c"
+        "stackchan_tailscale.c"
+        "stackchan_ready.c"
+        "stackchan_media.c"
+        "stackchan_presentation.c"
+        "stackchan_idle.c"
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+        esp-openclaw-node
+        esp-openclaw-node-provisioning
+        esp_adc
+        esp_app_format
+        console
+        esp_driver_gpio
+        esp_driver_i2c
+        spiffs
+        M5Unified
+        M5GFX
+        esp_event
+        esp_netif
+        esp_wifi
+        esp_http_client
+        esp-tls
+        esp32-camera
+        espressif__cjson
+        mbedtls
+        nvs_flash
+        microlink
+)
+
+# Pack the avatar JPEG frames into the "storage" SPIFFS partition and flash
+# them alongside the app.
+spiffs_create_partition_image(storage ../spiffs_image FLASH_IN_PROJECT)

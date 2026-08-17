@@ -1,0 +1,12 @@
+# ALL-LEGACY i2c (the winning combo — survives `idf.py reconfigure`):
+# On IDF 5.3 driver/i2c_master.h exists, so components auto-split between the NEW
+# and LEGACY i2c drivers and abort at boot with "CONFLICT! driver_ng". Force
+# everything onto the LEGACY driver:
+#   1. i2c_bus -> legacy via BACKWARD_CONFIG=y (below)
+#   2. m5gfx  -> legacy via source patch (managed_components common.cpp:
+#      sed -i '' 's/__has_include(<driver\/i2c_master.h>)/0/g' \
+#        managed_components/m5stack__m5gfx/src/lgfx/v1/platforms/esp32/common.cpp )
+#   3. m5unified pinned =0.2.17 (0.2.18 drives GPIO0 high -> kills JoyC SDA on G0)
+CONFIG_I2C_BUS_BACKWARD_CONFIG=y
+CONFIG_I2C_BUS_DYNAMIC_CONFIG=y
+CONFIG_I2C_MS_TO_WAIT=200

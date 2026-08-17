@@ -1,0 +1,15 @@
+version: "1.0.0"
+description: "ESP-IDF component for running OpenClaw Nodes on ESP32 devices."
+url: https://github.com/openclaw/esp-openclaw-node
+repository: https://github.com/openclaw/esp-openclaw-node.git
+repository_info:
+  path: "components/esp-openclaw-node"
+
+dependencies:
+  idf: ">=5.0"
+  espressif/cjson:
+    version: "1.7.19~2"
+  espressif/esp_websocket_client:
+    version: "1.6.1"
+  espressif/libsodium:
+    version: "1.0.21"

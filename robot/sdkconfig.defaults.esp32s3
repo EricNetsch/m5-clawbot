@@ -1,0 +1,19 @@
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+CONFIG_ESP_CONSOLE_SECONDARY_NONE=y
+
+# StackChan camera: keep the internal DMA line buffer small so it allocates
+# reliably even with WiFi/TLS heap in play, and is freed on esp_camera_deinit
+# after each shot (does not hold the speaker's scarce internal I2S DMA).
+# PSRAM DMA mode stays OFF: CoreS3 Quad PSRAM cannot keep up with the fixed
+# external pixel clock (EV-VSYNC-OVF), so frames go via an internal line buffer.
+CONFIG_CAMERA_DMA_BUFFER_SIZE_MAX=8192
+# CONFIG_CAMERA_PSRAM_DMA is not set
+
+# Systemic internal-SRAM headroom for the two concurrent WS/TLS handshakes
+# (operator + node legs). Lowered from the IDF default 16384 so generic
+# allocations under 4 KB (the many small mbedtls/lwip/ws handshake allocs) go
+# to PSRAM instead of internal SRAM, freeing contiguous internal-DMA for the
+# node-leg handshake. Explicit MALLOC_CAP_DMA/INTERNAL allocs (WiFi/lwip TX,
+# speaker I2S DMA, camera line buffer) are unaffected. Set here so it survives
+# clean builds that regenerate sdkconfig from defaults.
+CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=4096

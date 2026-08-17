@@ -1,0 +1,69 @@
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_DEFAULT_FULL=y
+CONFIG_MBEDTLS_SSL_PROTO_TLS1_3=y
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+
+# 16MB flash + custom partitions (StackChan avatar video storage)
+CONFIG_ESPTOOLPY_FLASHSIZE_2MB=n
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="16MB"
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=n
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# --- MicroLink / Tailscale integration ---
+# PSRAM: this M5 CoreS3 has external QUAD PSRAM (NOT octal). Octal mode = silent
+# boot crash. Big MicroLink buffers (coord 512KB, peer cache) land here.
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_QUAD=y
+CONFIG_SPIRAM_SPEED_80M=y
+CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP=y
+
+# lwIP: WireGuard netif needs raw sockets + larger buffers
+CONFIG_LWIP_MAX_SOCKETS=16
+CONFIG_LWIP_SO_RCVBUF=y
+CONFIG_LWIP_TCPIP_RECVMBOX_SIZE=64
+CONFIG_LWIP_TCP_SND_BUF_DEFAULT=32768
+CONFIG_LWIP_TCP_WND_DEFAULT=32768
+
+# mbedTLS: Noise protocol crypto (ChaCha20-Poly1305) + TLS1.2 for DERP
+CONFIG_MBEDTLS_CHACHA20_C=y
+CONFIG_MBEDTLS_POLY1305_C=y
+CONFIG_MBEDTLS_CHACHAPOLY_C=y
+CONFIG_MBEDTLS_HKDF_C=y
+CONFIG_MBEDTLS_SSL_PROTO_TLS1_2=y
+
+# Crypto perf + longer watchdog for TLS handshakes
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=30
+CONFIG_FREERTOS_HZ=1000
+CONFIG_FREERTOS_TIMER_TASK_STACK_DEPTH=4096
+
+# MicroLink: disable the web config server; we set the key over the console.
+CONFIG_ML_ENABLE_CONFIG_HTTPD=n
+
+# Route mbedTLS allocations to PSRAM so TLS record buffers + cert bundle do not
+# exhaust internal DRAM (fixes mbedtls_ssl_setup -0x7F00 SSL_ALLOC_FAILED).
+CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC=y
+
+# WiFi static TX buffers: default 16 x ~1.6 KB carves ~25 KB out of the initial
+# contiguous internal DRAM heap, fragmenting it. This firmware runs TWO WS/TLS
+# legs (operator + node); each websocket client task needs a contiguous 8 KB
+# INTERNAL stack (plain xTaskCreate stacks cannot live in PSRAM). With 16 static
+# TX buffers the internal heap fragments so the SECOND leg cannot find a
+# contiguous 8 KB -> "Error create websocket task" -> node leg never connects
+# (device stuck not-READY). Halving to 8 preserves ~12.8 KB of contiguous
+# internal so both WS task stacks fit, at the cost of shallower WiFi TX queueing
+# (fine for this low-throughput node; CACHE_TX_BUFFER_NUM still buffers).
+CONFIG_ESP_WIFI_STATIC_TX_BUFFER_NUM=8
+
+# WiFi static RX buffers: default 16 x ~1.6 KB also holds ~25 KB of internal
+# DMA-capable SRAM. The GC0308 camera's line buffer (esp_camera_init) MUST be a
+# contiguous INTERNAL DMA block (fed by GDMA; it cannot live in PSRAM -> the
+# CoreS3 quad-PSRAM EV-VSYNC-OVF issue). With both WS legs + WireGuard up, the
+# largest free internal-DMA block sat ~2.8-3.8 KB, too small even for the
+# smallest capture mode. Halving static RX to 8 frees ~12 KB internal DMA so a
+# capture line buffer fits at steady state. Dynamic RX (32) + AMPDU still cover
+# burst reception for this low-throughput node.
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=8

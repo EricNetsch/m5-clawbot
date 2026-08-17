@@ -1,0 +1,12 @@
+description: ESP32 compatible driver for OV2640, OV3660, OV5640, OV7670 and OV7725 image sensors.
+url: https://github.com/espressif/esp32-camera
+issues: https://github.com/espressif/esp32-camera/issues
+documentation: https://github.com/espressif/esp32-camera/tree/main/README.md
+repository: https://github.com/espressif/esp32-camera.git
+# NOTE (stackchan vendoring): upstream declares an `esp_jpeg` dependency, used
+# only by conversions/to_bmp.c (JPEG *decode*). This device only needs JPEG
+# *encode* (conversions/jpge.cpp + to_jpg.cpp, which are bundled here), so
+# to_bmp.c is dropped from CMakeLists and the esp_jpeg dependency is removed to
+# keep the build self-contained (no extra managed component to fetch).
+dependencies:
+  idf: ">=5.1"

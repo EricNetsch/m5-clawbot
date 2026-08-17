@@ -1,0 +1,12 @@
+## IDF Component Manager Manifest File
+dependencies:
+  idf:
+    version: '>=5.0.0'
+  m5stack/m5unified: '=0.2.17'   # pin: 0.2.18 drives GPIO0 high (countermeasure) which kills JoyC SDA on G0
+  # Pin m5gfx to the factory-proven version. 0.2.26 changed the esp32 I2C driver
+  # selection and collided with the legacy i2c_bus used for the JoyC (ok=0 reads).
+  # Factory (working) uses 0.2.23 unpatched: new i2c_master for M5 internal I2C,
+  # legacy i2c_bus on the free I2C_NUM_0 for the JoyC. They coexist cleanly.
+  m5stack/m5gfx: '=0.2.23'
+  espressif/esp-now: '=*'
+  espressif/i2c_bus: ^1.5.0

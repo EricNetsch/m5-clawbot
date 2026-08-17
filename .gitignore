@@ -1,0 +1,19 @@
+# ESP-IDF build artifacts
+**/build/
+**/build*/
+**/managed_components/
+**/sdkconfig
+**/sdkconfig.old
+**/sdkconfig.ci
+**/dependencies.lock
+**/__pycache__/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+dist/
+
+# Never commit real credentials
+**/sdkconfig.credentials
+**/*.credentials.local
